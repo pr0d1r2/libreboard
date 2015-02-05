@@ -1,0 +1,183 @@
+<template name="boardWidgets">
+    <a href="#" class="sidebar-show-btn dark-hover js-show-sidebar">
+        <span class="icon-sm icon-leftarrow"></span>
+        <span class="text">Show sidebar</span>
+    </a>
+    <div class="board-widgets {{#if openWidgets}}show{{else}}hide{{/if}} }}">
+        <div>
+            <a href="#" class="sidebar-hide-btn dark-hover js-hide-sidebar" title="Close the board sidebar.">
+                <span class="icon-sm icon-rightarrow"></span>
+            </a>
+            <div class="board-widgets-title clearfix">
+                <a href="#" class="board-sidebar-back-btn js-pop-widget-view">
+                    <span class="left-arrow"></span>Back
+                </a>
+                <h3 class="text"></h3>
+                <hr>
+            </div>
+            <div class="board-widgets-content-wrapper">
+                <div class="board-widgets-content default fancy-scrollbar short">
+                    {{ > menuWidget board=board }}
+                    {{ > membersWidget }}
+                    {{ > activityWidget }}
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template name="menuWidget">
+    <div class="board-widget board-widget-nav clearfix collapsed">
+        <h3 class="dark-hover toggle-widget-nav js-toggle-widget-nav">Menu
+            <span class="icon-sm icon-menu toggle-menu-icon"></span>
+        </h3>
+        <ul class="nav-list">
+            <hr style="margin-top: 0;">
+            <li>
+                <a href="#" class="nav-list-item js-open-archive">
+                    <span class="icon-sm icon-archive icon-type"></span>
+                    Archived Items
+                </a>
+            </li>
+            {{# unless isSandstorm }}
+                {{# if currentUser.isBoardAdmin }}
+                    <li>
+                        <a class="nav-list-item nav-list-sub-item js-close-board" href="#" popOffset='boardRemove'> Close Board… </a>
+                    </li>
+                {{/ if }}
+            {{/ unless }}
+        </ul>
+    </div>
+</template>
+
+<template name="membersWidget">
+    <hr>
+    <div class="board-widget board-widget-members clearfix">
+        <div class="board-widget-title">
+            <h3>Members</h3>
+        </div>
+        <div class="board-widget-content">
+            <div class="board-widget-members js-list-board-members clearfix js-list-draggable-board-members">
+                {{# each board.members }}
+                    {{> avatar draggable=true memberId=this.userId popOffset='member' }}
+                {{/ each }}
+            </div>
+            {{# if currentUser.isBoardAdmin }}
+                <a href="#" class="button-link js-open-manage-board-members" popOffset='membersAdd'>
+                    <span class="icon-sm icon-member"></span> Add Members…
+                </a>
+            {{/ if }}
+        </div>
+    </div>
+</template>
+
+<template name="activityWidget">
+    {{# if board.activities.count }}
+        <hr>
+        <div class="board-widget board-widget-activity bottom clearfix">
+            <div class="board-widget-title">
+                <h3>Activity</h3>
+            </div>
+            <div class="board-widget-content">
+                <div class="activity-gradient-t"></div>
+                <div class="activity-gradient-b"></div>
+                <div class="board-actions-list fancy-scrollbar">
+                    {{ > activities }}
+                </div>
+            </div>
+        </div>
+    {{/if}}
+</template>
+
+<template name='memberPop'>
+    <div class="board-member-menu">
+        <div class="mini-profile-info">
+            <div class="member-large">
+                <span class="member-initials" title="{{ user.profile.name}} ({{ user.profile.username}})">{{ firstChar user.profile.name }}</span>
+            </div>
+            <div class="info">
+                <h3 class="bottom" style="margin-right: 40px;">
+                    <a class="js-profile" href="{{ pathFor route='Profile' username=user.username }}">{{ user.profile.name }}</a>
+                </h3>
+                <p class="quiet bottom">@{{ user.username }}</p>
+            </div>
+        </div>
+        {{# if currentUser.isBoardMember }}
+            <ul class="pop-over-list">
+                {{# if currentUser.isBoardAdmin }}
+                    <li>
+                        <a class="js-change-role" href="#">
+                            Change permissions… <span class="quiet" style="font-weight: normal;">({{ memberType }})</span>
+                        </a>
+                    </li>
+                {{/ if }}
+
+                <li>
+                    {{# if currentUser.isBoardAdmin }}
+                        <a class="js-remove-member" popoffset='removeMember'>Remove from Board…</a>
+                    {{ else }}
+                        <a class="js-leave-member">Leave Board…</a>
+                    {{/ if }}
+                </li>
+            </ul>
+        {{/ if }}
+    </div>
+</template>
+
+<template name="closeBoardPop">
+    <p>
+        You can re-open the board by clicking the "Boards" menu from the header, selecting
+        "View Closed Boards", finding the board and clicking "Re-open".
+    </p>
+    <input type="submit" class="js-confirm negate full" value="Close">
+</template>
+
+<template name="removeMemberPop">
+    <p> Remove {{ user.profile.name }} ({{ user.username }}) from {{ board.title }}? The member will be removed from all cards on this board. They will receive a notification. </p>
+    <input type="submit" class="js-confirm negate full" value="Remove Member">
+</template>
+
+<template name="addMemberPop">
+    <div class="search-with-spinner">
+        {{> esInput index="users" }}
+    </div>
+
+    <div class="manage-member-section hide js-search-results" style="display: block;">
+        <ul class="pop-over-member-list options js-list">
+            {{# esEach index="users"}}
+                <li class="item js-member-item {{# if isBoardMember }}disabled{{/if}}">
+                    <a href="#" class="name js-select-member {{# if isBoardMember }}multi-line{{/if}}" title="{{ profile.name }} ({{ username }})">
+                        <span class="member js-member">
+                            <span class="member-initials">{{ firstChar profile.name }}</span>
+                        </span>
+                        <span class="full-name">
+                            {{ profile.name }}  (<span class="username">{{ username }}</span>)
+                        </span>
+                       {{# if isBoardMember }}
+                           <div class="extra-text quiet">(joined)</div>
+                       {{/if}}
+                        <span class="icon-sm icon-rightarrow light option js-open-option"></span>
+                    </a>
+                </li>
+            {{/esEach }}
+        </ul>
+    </div>
+
+    {{# ifEsIsSearching index='users' }}
+        <div class="tac">
+            <span class="tabbed-pane-main-col-loading-spinner spinner"></span>
+        </div>
+    {{ /ifEsIsSearching }}
+
+     {{# ifEsHasNoResults index="users" }}
+        <div class="manage-member-section js-no-results">
+            <p class="quiet center" style="padding: 16px 4px;">No results</p>
+        </div>
+    {{ /ifEsHasNoResults }}
+
+    <div class="manage-member-section js-helper">
+        <p class="bottom quiet" style="padding: 6px;">
+            Search for a person in LibreBoard by name or email address, or enter an email address to invite someone new.
+        </p>
+    </div>
+</template>

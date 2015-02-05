@@ -1,0 +1,154 @@
+<template name="activities">
+    <div class="js-sidebar-list-actions">
+        {{# each board.activities }}
+            <div class="phenom phenom-action clearfix phenom-other">
+                <div class="creator member js-show-mem-menu">
+                    <span class="member-initials" title="{{ user.profile.name }} ({{ user.username }})">
+                        {{ firstChar user.profile.name }}
+                    </span>
+                </div>
+                <div class="phenom-desc">
+                    {{ > memberName user=user offset='member' }}
+
+                    {{# if isTrue activityType 'createBoard' }}
+                        created this board.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'createList' }}
+                        added {{ list.title }} to this board.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'archivedList' }}
+                        archived {{ list.title }}.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'createCard' }}
+                        added <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a> to {{ list.title }}.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'archivedCard' }}
+                        archived <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a>
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'restoredCard' }}
+                        sent <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a> to the board.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'moveCard' }}
+                        moved <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a> from {{ oldList.title }} to {{ list.title }}.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'addBoardMember' }}
+                        added {{ > memberName user=member offset='member' }} to this board.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'removeBoardMember' }}
+                        excluded {{ > memberName user=member offset='member' }} from this board.
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'joinMember' }}
+                        {{# if isTrue currentUser._id member._id }}
+                            joined <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a>.
+                        {{ else }}
+                            added {{ > memberName user=member offset='member' }} to <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a>.
+                        {{/if}}
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'unjoinMember' }}
+                        {{# if isTrue currentUser._id member._id }}
+                            unjoined <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a>.
+                        {{ else }}
+                            removed {{ > memberName user=member offset='member' }} from <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a>.
+                        {{/if}}
+                    {{ /if }}
+
+                    {{# if isTrue activityType 'addComment' }}
+                        <div class="phenom-desc">
+                            on <a href="{{ card.absoluteUrl }}" class="action-card">{{ card.title }}</a>
+                            <div class="action-comment markeddown">
+                                <a href="{{ card.absoluteUrl }}" class="current-comment show tdn">
+                                    <p>{{#viewer}}{{ comment.text }}{{/viewer}}</p>
+                                </a>
+                            </div>
+                        </div>
+                    {{ /if }}
+                </div>
+                <p class="phenom-meta quiet">
+                    <span class="date js-hide-on-sending">
+                        {{ livestamp createdAt }}
+                    </span>
+                </p>
+            </div>
+        {{ /each }}
+    </div>
+</template>
+
+<template name="cardActivities">
+        <div class="js-list-actions">
+            {{# each card.comments }}
+                <div class="phenom phenom-action clearfix phenom-comment">
+                    <div class="creator member js-show-mem-menu">
+                        <span class="member-initials" title="{{ user.profile.name }} ({{ user.username }})">{{ firstChar user.profile.name }}</span>
+                    </div>
+                    <form>
+                        <div class="phenom-desc">
+                            {{ > memberName user=user offset='user' }}
+                            <div class="action-comment markeddown">
+                                <div class="current-comment">
+                                  {{#viewer}}{{ text }}{{/viewer}}
+                                </div>
+                                <textarea class="js-text" tabindex="1">{{ text }}</textarea>
+                            </div>
+                        </div>
+                        <div class="edit-controls clearfix">
+                            <input type="submit" class="primary confirm js-save-edit" value="Save" tabindex="2">
+                        </div>
+                    </form>
+                    <p class="phenom-meta quiet">
+                        <span class="date js-hide-on-sending">{{ livestamp createdAt }}</span>
+                        {{# if currentUser }}
+                            <span class="js-hide-on-sending">
+                                - <a href="#" class="js-edit-action">Edit</a>
+                                - <a href="#" class="js-confirm-delete-action">Delete</a>
+                            </span>
+                        {{/ if }}
+                    </p>
+                </div>
+            {{/each}}
+
+            {{# each card.activities }}
+                <div class="phenom phenom-action clearfix phenom-other">
+                    <div class="creator member js-show-mem-menu">
+                        <span class="member-initials" title="{{ user.profile.name }} ({{ user.username }})">{{ firstChar user.profile.name }}</span>
+                    </div>
+                    {{ > memberName user=user offset='user' }}
+                    {{# if isTrue activityType 'createCard' }}
+                        added this card to {{ list.title }}.
+                    {{ /if }}
+                    {{# if isTrue activityType 'joinMember' }}
+                        {{# if isTrue currentUser._id member._id }}
+                            joined this card.
+                        {{ else }}
+                            added this card to {{ > memberName user=member offset='user' }}.
+                        {{/if}}
+                    {{/if}}
+                    {{# if isTrue activityType 'unjoinMember' }}
+                        {{# if isTrue currentUser._id member._id }}
+                            unjoined this card.
+                        {{ else }}
+                            removed this card from {{ > memberName user=member offset='user' }}.
+                        {{/if}}
+                    {{ /if }}
+                    {{# if isTrue activityType 'archivedCard' }}
+                        archived this card.
+                    {{ /if }}
+                    {{# if isTrue activityType 'restoredCard' }}
+                        sent this card to the board.
+                    {{/ if }}
+                    {{# if isTrue activityType 'moveCard' }}
+                        moved this card from {{ oldList.title }} to {{ list.title }}.
+                    {{/ if }}
+                </div>
+            {{/each}}
+        </div>
+</template>
